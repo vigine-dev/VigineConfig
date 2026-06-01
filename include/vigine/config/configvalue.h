@@ -75,6 +75,12 @@ public:
     }
 
     template <typename ValueType>
+    [[nodiscard]] ValueType *getIf() noexcept
+    {
+        return std::get_if<ValueType>(&_storage);
+    }
+
+    template <typename ValueType>
     [[nodiscard]] ValueType valueOr(ValueType fallback) const
     {
         if (const ValueType *held = std::get_if<ValueType>(&_storage))
