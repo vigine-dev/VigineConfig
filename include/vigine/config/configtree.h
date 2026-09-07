@@ -12,4 +12,4 @@ namespace vigine::config
 // Store `value` at `key`, creating (and, when needed, replacing non-table nodes
 // with) intermediate tables along the path. An empty key replaces the tree.
 void setValue(ConfigValue &tree, const ConfigKey &key, ConfigValue value);
-}
+} // namespace vigine::config

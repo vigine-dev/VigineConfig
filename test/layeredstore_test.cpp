@@ -1,13 +1,12 @@
-#include <gtest/gtest.h>
-
-#include <cstdint>
-#include <string>
-#include <utility>
-
 #include "vigine/config/configkey.h"
 #include "vigine/config/configtree.h"
 #include "vigine/config/configvalue.h"
 #include "vigine/config/layeredstore.h"
+
+#include <cstdint>
+#include <gtest/gtest.h>
+#include <string>
+#include <utility>
 
 using vigine::config::ConfigKey;
 using vigine::config::ConfigTable;
@@ -24,7 +23,7 @@ ConfigValue tableWith(const ConfigKey &key, ConfigValue value)
     setValue(tree, key, std::move(value));
     return tree;
 }
-}
+} // namespace
 
 TEST(LayeredStoreTest, HigherLayerOverridesLower)
 {

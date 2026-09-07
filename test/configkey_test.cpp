@@ -1,8 +1,7 @@
-#include <gtest/gtest.h>
-
-#include <stdexcept>
-
 #include "vigine/config/configkey.h"
+
+#include <gtest/gtest.h>
+#include <stdexcept>
 
 using vigine::config::ConfigKey;
 

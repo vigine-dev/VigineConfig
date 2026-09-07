@@ -18,7 +18,8 @@ ConfigKey::ConfigKey(std::string_view dotted)
         const std::size_t end = (dot == std::string_view::npos) ? dotted.size() : dot;
         if (end == start)
         {
-            throw std::invalid_argument("ConfigKey: empty segment in \"" + std::string(dotted) + "\"");
+            throw std::invalid_argument("ConfigKey: empty segment in \"" + std::string(dotted) +
+                                        "\"");
         }
         _segments.emplace_back(dotted.substr(start, end - start));
         if (dot == std::string_view::npos)
@@ -67,4 +68,4 @@ ConfigKey &ConfigKey::append(std::string_view segment)
     _segments.emplace_back(segment);
     return *this;
 }
-}
+} // namespace vigine::config

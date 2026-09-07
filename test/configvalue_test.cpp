@@ -1,10 +1,9 @@
-#include <gtest/gtest.h>
+#include "vigine/config/configvalue.h"
 
 #include <cstdint>
+#include <gtest/gtest.h>
 #include <string>
 #include <utility>
-
-#include "vigine/config/configvalue.h"
 
 using vigine::config::ConfigArray;
 using vigine::config::ConfigTable;
@@ -44,11 +43,17 @@ TEST(ConfigValueTest, NestedContainersCompareByValue)
 {
     ConfigTable left;
     left.emplace("port", ConfigValue{8080});
-    left.emplace("tags", ConfigValue{ConfigArray{ConfigValue{std::string{"a"}}, ConfigValue{std::string{"b"}}}});
+    left.emplace("tags",
+                 ConfigValue{
+                     ConfigArray{ConfigValue{std::string{"a"}}, ConfigValue{std::string{"b"}}}
+    });
 
     ConfigTable right;
     right.emplace("port", ConfigValue{8080});
-    right.emplace("tags", ConfigValue{ConfigArray{ConfigValue{std::string{"a"}}, ConfigValue{std::string{"b"}}}});
+    right.emplace("tags",
+                  ConfigValue{
+                      ConfigArray{ConfigValue{std::string{"a"}}, ConfigValue{std::string{"b"}}}
+    });
 
     EXPECT_EQ(ConfigValue{std::move(left)}, ConfigValue{std::move(right)});
 }

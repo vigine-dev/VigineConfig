@@ -1,9 +1,9 @@
 #include "vigine/config/schemaregistry.h"
 
+#include "vigine/config/configtree.h"
+
 #include <sstream>
 #include <utility>
-
-#include "vigine/config/configtree.h"
 
 namespace vigine::config
 {
@@ -13,7 +13,7 @@ void SchemaRegistry::declare(ConfigKey key, ConfigType type, ConfigValue default
     {
         if (entry.key == key)
         {
-            entry.type = type;
+            entry.type         = type;
             entry.defaultValue = std::move(defaultValue);
             return;
         }
@@ -44,4 +44,4 @@ ValidationResult SchemaRegistry::validate(const ConfigValue &tree) const
     }
     return result;
 }
-}
+} // namespace vigine::config
