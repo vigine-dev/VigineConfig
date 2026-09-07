@@ -1,16 +1,16 @@
 #pragma once
 
+#include "vigine/config/configvalue.h"
+
 #include <stdexcept>
 #include <string>
 #include <string_view>
-
-#include "vigine/config/configvalue.h"
 
 namespace vigine::config
 {
 class ConfigParseError : public std::runtime_error
 {
-public:
+  public:
     using std::runtime_error::runtime_error;
 };
 
@@ -21,4 +21,4 @@ public:
 // Serialize a ConfigValue (which must hold a Table) back to TOML text. Throws
 // std::invalid_argument when the root value is not a table.
 [[nodiscard]] std::string serializeToml(const ConfigValue &value);
-}
+} // namespace vigine::config

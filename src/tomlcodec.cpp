@@ -2,9 +2,8 @@
 
 #include <sstream>
 #include <string>
-#include <utility>
-
 #include <toml++/toml.hpp>
+#include <utility>
 
 namespace vigine::config
 {
@@ -14,8 +13,7 @@ ConfigValue fromNode(const toml::node &node)
 {
     switch (node.type())
     {
-    case toml::node_type::table:
-    {
+    case toml::node_type::table: {
         ConfigTable result;
         for (auto &&[key, value] : *node.as_table())
         {
@@ -23,8 +21,7 @@ ConfigValue fromNode(const toml::node &node)
         }
         return ConfigValue{std::move(result)};
     }
-    case toml::node_type::array:
-    {
+    case toml::node_type::array: {
         ConfigArray result;
         for (auto &&element : *node.as_array())
         {
@@ -40,20 +37,17 @@ ConfigValue fromNode(const toml::node &node)
         return ConfigValue{node.as_floating_point()->get()};
     case toml::node_type::boolean:
         return ConfigValue{node.as_boolean()->get()};
-    case toml::node_type::date:
-    {
+    case toml::node_type::date: {
         std::ostringstream stream;
         stream << node.as_date()->get();
         return ConfigValue{stream.str()};
     }
-    case toml::node_type::time:
-    {
+    case toml::node_type::time: {
         std::ostringstream stream;
         stream << node.as_time()->get();
         return ConfigValue{stream.str()};
     }
-    case toml::node_type::date_time:
-    {
+    case toml::node_type::date_time: {
         std::ostringstream stream;
         stream << node.as_date_time()->get();
         return ConfigValue{stream.str()};
@@ -140,7 +134,7 @@ toml::array buildArray(const ConfigArray &source)
     }
     return array;
 }
-}
+} // namespace
 
 ConfigValue parseToml(std::string_view text)
 {
@@ -148,12 +142,11 @@ ConfigValue parseToml(std::string_view text)
     {
         const toml::table table = toml::parse(text);
         return fromNode(table);
-    }
-    catch (const toml::parse_error &error)
+    } catch (const toml::parse_error &error)
     {
         std::ostringstream stream;
-        stream << "TOML parse error: " << error.description() << " (line " << error.source().begin.line
-               << ", column " << error.source().begin.column << ")";
+        stream << "TOML parse error: " << error.description() << " (line "
+               << error.source().begin.line << ", column " << error.source().begin.column << ")";
         throw ConfigParseError(stream.str());
     }
 }
@@ -170,4 +163,4 @@ std::string serializeToml(const ConfigValue &value)
     stream << table;
     return stream.str();
 }
-}
+} // namespace vigine::config

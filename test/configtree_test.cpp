@@ -1,10 +1,9 @@
-#include <gtest/gtest.h>
-
-#include <cstdint>
-
 #include "vigine/config/configkey.h"
 #include "vigine/config/configtree.h"
 #include "vigine/config/configvalue.h"
+
+#include <cstdint>
+#include <gtest/gtest.h>
 
 using vigine::config::ConfigKey;
 using vigine::config::ConfigTable;

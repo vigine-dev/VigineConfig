@@ -1,8 +1,8 @@
 #include "vigine/config/layeredstore.h"
 
-#include <utility>
-
 #include "vigine/config/configtree.h"
+
+#include <utility>
 
 namespace vigine::config
 {
@@ -15,7 +15,7 @@ void mergeInto(ConfigValue &base, const ConfigValue &overlay)
         return;
     }
     const ConfigTable *overlayTable = overlay.getIf<ConfigTable>();
-    ConfigTable *baseTable = base.getIf<ConfigTable>();
+    ConfigTable *baseTable          = base.getIf<ConfigTable>();
     if (overlayTable == nullptr || baseTable == nullptr)
     {
         base = overlay;
@@ -26,12 +26,9 @@ void mergeInto(ConfigValue &base, const ConfigValue &overlay)
         mergeInto((*baseTable)[key], value);
     }
 }
-}
+} // namespace
 
-void LayeredStore::pushLayer(ConfigValue tree)
-{
-    _layers.push_back(std::move(tree));
-}
+void LayeredStore::pushLayer(ConfigValue tree) { _layers.push_back(std::move(tree)); }
 
 void LayeredStore::setLayer(std::size_t index, ConfigValue tree)
 {
@@ -64,4 +61,4 @@ ConfigValue LayeredStore::flatten() const
     }
     return result;
 }
-}
+} // namespace vigine::config

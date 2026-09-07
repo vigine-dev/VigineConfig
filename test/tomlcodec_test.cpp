@@ -1,11 +1,10 @@
-#include <gtest/gtest.h>
-
-#include <cstdint>
-#include <stdexcept>
-#include <string>
-
 #include "vigine/config/configvalue.h"
 #include "vigine/config/tomlcodec.h"
+
+#include <cstdint>
+#include <gtest/gtest.h>
+#include <stdexcept>
+#include <string>
 
 using vigine::config::ConfigArray;
 using vigine::config::ConfigParseError;
@@ -16,12 +15,12 @@ using vigine::config::serializeToml;
 
 TEST(TomlCodecTest, ParsesScalarsAndNesting)
 {
-    const ConfigValue root = parseToml("title = \"app\"\n"
-                                       "[window]\n"
-                                       "width = 800\n"
-                                       "ratio = 1.5\n"
-                                       "visible = true\n"
-                                       "tags = [\"a\", \"b\"]\n");
+    const ConfigValue root   = parseToml("title = \"app\"\n"
+                                         "[window]\n"
+                                         "width = 800\n"
+                                         "ratio = 1.5\n"
+                                         "visible = true\n"
+                                         "tags = [\"a\", \"b\"]\n");
 
     const ConfigTable *table = root.getIf<ConfigTable>();
     ASSERT_NE(table, nullptr);
@@ -49,7 +48,7 @@ TEST(TomlCodecTest, RoundTripsToEqualTree)
                                            "flag = true\n"
                                            "list = [1, 2, 3]\n");
 
-    const std::string text = serializeToml(original);
+    const std::string text     = serializeToml(original);
     const ConfigValue reparsed = parseToml(text);
     EXPECT_EQ(original, reparsed);
 }

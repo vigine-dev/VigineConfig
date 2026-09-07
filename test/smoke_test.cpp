@@ -1,11 +1,9 @@
-#include <gtest/gtest.h>
+#include "vigineconfig/vigineconfig.h"
 
 #include <cstdint>
+#include <gtest/gtest.h>
 #include <string_view>
-
 #include <toml++/toml.hpp>
-
-#include "vigineconfig/vigineconfig.h"
 
 // The nested toml++ submodule resolves and parses.
 TEST(VigineConfigSmoke, TomlPlusPlusParsesAValue)
@@ -15,10 +13,7 @@ TEST(VigineConfigSmoke, TomlPlusPlusParsesAValue)
     EXPECT_EQ(table["server"]["name"].value_or(std::string_view{}), "vigine");
 }
 
-TEST(VigineConfigSmoke, LibraryLinks)
-{
-    EXPECT_STRNE(vigine::config::version(), "");
-}
+TEST(VigineConfigSmoke, LibraryLinks) { EXPECT_STRNE(vigine::config::version(), ""); }
 
 // The umbrella header exposes the public API behind a single include.
 TEST(VigineConfigSmoke, UmbrellaHeaderExposesApi)

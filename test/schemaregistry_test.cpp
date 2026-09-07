@@ -1,12 +1,11 @@
-#include <gtest/gtest.h>
-
-#include <cstdint>
-#include <string>
-
 #include "vigine/config/configkey.h"
 #include "vigine/config/configtree.h"
 #include "vigine/config/configvalue.h"
 #include "vigine/config/schemaregistry.h"
+
+#include <cstdint>
+#include <gtest/gtest.h>
+#include <string>
 
 using vigine::config::ConfigKey;
 using vigine::config::ConfigTable;
@@ -20,7 +19,8 @@ using vigine::config::ValidationResult;
 TEST(SchemaRegistryTest, FillsDefaultsForMissingKeys)
 {
     SchemaRegistry registry;
-    registry.declare(ConfigKey{"window.width"}, ConfigType::Integer, ConfigValue{std::int64_t{800}});
+    registry.declare(ConfigKey{"window.width"}, ConfigType::Integer,
+                     ConfigValue{std::int64_t{800}});
 
     const ValidationResult result = registry.validate(ConfigValue{ConfigTable{}});
     EXPECT_TRUE(result.ok);

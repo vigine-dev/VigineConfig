@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
-#include <vector>
-
 #include "vigine/config/configkey.h"
 #include "vigine/config/configvalue.h"
+
+#include <string>
+#include <vector>
 
 namespace vigine::config
 {
@@ -26,7 +26,7 @@ struct ValidationResult
 // and a default. validate() type-checks a tree and fills defaults for absentees.
 class SchemaRegistry
 {
-public:
+  public:
     // Register an expected key. Re-declaring the same key replaces its entry.
     void declare(ConfigKey key, ConfigType type, ConfigValue defaultValue);
 
@@ -37,7 +37,7 @@ public:
     // and leave the offending value untouched in the resolved tree.
     [[nodiscard]] ValidationResult validate(const ConfigValue &tree) const;
 
-private:
+  private:
     std::vector<SchemaEntry> _entries;
 };
-}
+} // namespace vigine::config

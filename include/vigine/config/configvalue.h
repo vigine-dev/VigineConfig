@@ -31,7 +31,7 @@ enum class ConfigType
 // mirrors the variant alternative order, so type() is a plain index cast.
 class ConfigValue
 {
-public:
+  public:
     ConfigValue() noexcept = default;
 
     ConfigValue(bool value) : _storage(value) {}
@@ -92,7 +92,8 @@ public:
 
     bool operator==(const ConfigValue &other) const = default;
 
-private:
-    std::variant<std::monostate, bool, std::int64_t, double, std::string, ConfigArray, ConfigTable> _storage;
+  private:
+    std::variant<std::monostate, bool, std::int64_t, double, std::string, ConfigArray, ConfigTable>
+        _storage;
 };
-}
+} // namespace vigine::config

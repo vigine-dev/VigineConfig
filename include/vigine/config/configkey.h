@@ -11,7 +11,7 @@ namespace vigine::config
 // non-empty; an empty path is the root.
 class ConfigKey
 {
-public:
+  public:
     ConfigKey() = default;
     explicit ConfigKey(std::string_view dotted);
 
@@ -27,7 +27,7 @@ public:
 
     bool operator==(const ConfigKey &other) const = default;
 
-private:
+  private:
     std::vector<std::string> _segments;
 };
-}
+} // namespace vigine::config

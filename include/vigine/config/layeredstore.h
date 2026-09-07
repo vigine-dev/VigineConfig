@@ -1,10 +1,10 @@
 #pragma once
 
-#include <cstddef>
-#include <vector>
-
 #include "vigine/config/configkey.h"
 #include "vigine/config/configvalue.h"
+
+#include <cstddef>
+#include <vector>
 
 namespace vigine::config
 {
@@ -12,7 +12,7 @@ namespace vigine::config
 // lookups fall through to lower layers and flatten() deep-merges them.
 class LayeredStore
 {
-public:
+  public:
     void pushLayer(ConfigValue tree);
     void setLayer(std::size_t index, ConfigValue tree);
     [[nodiscard]] std::size_t layerCount() const noexcept { return _layers.size(); }
@@ -34,7 +34,7 @@ public:
     // scalars from higher layers overwrite lower ones.
     [[nodiscard]] ConfigValue flatten() const;
 
-private:
+  private:
     std::vector<ConfigValue> _layers;
 };
-}
+} // namespace vigine::config

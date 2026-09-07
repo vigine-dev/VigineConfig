@@ -35,7 +35,7 @@ void setValue(ConfigValue &tree, const ConfigKey &key, ConfigValue value)
         return;
     }
 
-    ConfigValue *current = &tree;
+    ConfigValue *current                     = &tree;
     const std::vector<std::string> &segments = key.segments();
     for (std::size_t index = 0; index < segments.size(); ++index)
     {
@@ -43,7 +43,7 @@ void setValue(ConfigValue &tree, const ConfigKey &key, ConfigValue value)
         {
             *current = ConfigValue{ConfigTable{}};
         }
-        ConfigTable *table = current->getIf<ConfigTable>();
+        ConfigTable *table         = current->getIf<ConfigTable>();
         const std::string &segment = segments[index];
         if (index + 1 == segments.size())
         {
@@ -53,4 +53,4 @@ void setValue(ConfigValue &tree, const ConfigKey &key, ConfigValue value)
         current = &(*table)[segment];
     }
 }
-}
+} // namespace vigine::config
