@@ -66,22 +66,22 @@ void insertValue(toml::table &table, std::string_view key, const ConfigValue &va
     switch (value.type())
     {
     case ConfigType::Boolean:
-        table.insert(key, *value.getIf<bool>());
+        table.insert(key, *value.getIfBoolean());
         break;
     case ConfigType::Integer:
-        table.insert(key, *value.getIf<std::int64_t>());
+        table.insert(key, *value.getIfInteger());
         break;
     case ConfigType::Floating:
-        table.insert(key, *value.getIf<double>());
+        table.insert(key, *value.getIfFloating());
         break;
     case ConfigType::String:
-        table.insert(key, *value.getIf<std::string>());
+        table.insert(key, *value.getIfString());
         break;
     case ConfigType::Array:
-        table.insert(key, buildArray(*value.getIf<ConfigArray>()));
+        table.insert(key, buildArray(*value.getIfArray()));
         break;
     case ConfigType::Table:
-        table.insert(key, buildTable(*value.getIf<ConfigTable>()));
+        table.insert(key, buildTable(*value.getIfTable()));
         break;
     case ConfigType::None:
         break;
@@ -93,22 +93,22 @@ void pushValue(toml::array &array, const ConfigValue &value)
     switch (value.type())
     {
     case ConfigType::Boolean:
-        array.push_back(*value.getIf<bool>());
+        array.push_back(*value.getIfBoolean());
         break;
     case ConfigType::Integer:
-        array.push_back(*value.getIf<std::int64_t>());
+        array.push_back(*value.getIfInteger());
         break;
     case ConfigType::Floating:
-        array.push_back(*value.getIf<double>());
+        array.push_back(*value.getIfFloating());
         break;
     case ConfigType::String:
-        array.push_back(*value.getIf<std::string>());
+        array.push_back(*value.getIfString());
         break;
     case ConfigType::Array:
-        array.push_back(buildArray(*value.getIf<ConfigArray>()));
+        array.push_back(buildArray(*value.getIfArray()));
         break;
     case ConfigType::Table:
-        array.push_back(buildTable(*value.getIf<ConfigTable>()));
+        array.push_back(buildTable(*value.getIfTable()));
         break;
     case ConfigType::None:
         break;
@@ -153,7 +153,7 @@ ConfigValue parseToml(std::string_view text)
 
 std::string serializeToml(const ConfigValue &value)
 {
-    const ConfigTable *root = value.getIf<ConfigTable>();
+    const ConfigTable *root = value.getIfTable();
     if (root == nullptr)
     {
         throw std::invalid_argument("serializeToml: root value must be a table");

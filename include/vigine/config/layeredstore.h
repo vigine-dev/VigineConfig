@@ -4,6 +4,8 @@
 #include "vigine/config/configvalue.h"
 
 #include <cstddef>
+#include <cstdint>
+#include <string>
 #include <vector>
 
 namespace vigine::config
@@ -20,15 +22,11 @@ class LayeredStore
     // Highest-precedence value for `key`, or nullptr when no layer holds it.
     [[nodiscard]] const ConfigValue *find(const ConfigKey &key) const;
 
-    template <typename ValueType>
-    [[nodiscard]] ValueType valueOr(const ConfigKey &key, ValueType fallback) const
-    {
-        if (const ConfigValue *found = find(key))
-        {
-            return found->valueOr<ValueType>(fallback);
-        }
-        return fallback;
-    }
+    // The highest-precedence value of that kind for `key`, or the fallback.
+    [[nodiscard]] bool booleanOr(const ConfigKey &key, bool fallback) const;
+    [[nodiscard]] std::int64_t integerOr(const ConfigKey &key, std::int64_t fallback) const;
+    [[nodiscard]] double floatingOr(const ConfigKey &key, double fallback) const;
+    [[nodiscard]] std::string stringOr(const ConfigKey &key, std::string fallback) const;
 
     // Merge every layer low-to-high into a single tree; tables merge recursively,
     // scalars from higher layers overwrite lower ones.

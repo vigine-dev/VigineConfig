@@ -12,7 +12,7 @@ const ConfigValue *findValue(const ConfigValue &tree, const ConfigKey &key)
     const ConfigValue *current = &tree;
     for (const std::string &segment : key.segments())
     {
-        const ConfigTable *table = current->getIf<ConfigTable>();
+        const ConfigTable *table = current->getIfTable();
         if (table == nullptr)
         {
             return nullptr;
@@ -39,11 +39,11 @@ void setValue(ConfigValue &tree, const ConfigKey &key, ConfigValue value)
     const std::vector<std::string> &segments = key.segments();
     for (std::size_t index = 0; index < segments.size(); ++index)
     {
-        if (!current->is<ConfigTable>())
+        if (!current->isTable())
         {
             *current = ConfigValue{ConfigTable{}};
         }
-        ConfigTable *table         = current->getIf<ConfigTable>();
+        ConfigTable *table         = current->getIfTable();
         const std::string &segment = segments[index];
         if (index + 1 == segments.size())
         {

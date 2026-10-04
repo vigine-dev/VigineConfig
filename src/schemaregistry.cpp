@@ -24,7 +24,7 @@ void SchemaRegistry::declare(ConfigKey key, ConfigType type, ConfigValue default
 ValidationResult SchemaRegistry::validate(const ConfigValue &tree) const
 {
     ValidationResult result;
-    result.resolved = tree.is<ConfigTable>() ? tree : ConfigValue{ConfigTable{}};
+    result.resolved = tree.isTable() ? tree : ConfigValue{ConfigTable{}};
 
     for (const SchemaEntry &entry : _entries)
     {

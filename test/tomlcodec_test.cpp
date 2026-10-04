@@ -22,21 +22,21 @@ TEST(TomlCodecTest, ParsesScalarsAndNesting)
                                          "visible = true\n"
                                          "tags = [\"a\", \"b\"]\n");
 
-    const ConfigTable *table = root.getIf<ConfigTable>();
+    const ConfigTable *table = root.getIfTable();
     ASSERT_NE(table, nullptr);
-    EXPECT_EQ(table->at("title").valueOr<std::string>(""), "app");
+    EXPECT_EQ(table->at("title").stringOr(""), "app");
 
-    const ConfigTable *window = table->at("window").getIf<ConfigTable>();
+    const ConfigTable *window = table->at("window").getIfTable();
     ASSERT_NE(window, nullptr);
-    EXPECT_EQ(window->at("width").valueOr<std::int64_t>(0), 800);
-    EXPECT_DOUBLE_EQ(window->at("ratio").valueOr<double>(0.0), 1.5);
-    EXPECT_TRUE(window->at("visible").valueOr<bool>(false));
+    EXPECT_EQ(window->at("width").integerOr(0), 800);
+    EXPECT_DOUBLE_EQ(window->at("ratio").floatingOr(0.0), 1.5);
+    EXPECT_TRUE(window->at("visible").booleanOr(false));
 
-    const ConfigArray *tags = window->at("tags").getIf<ConfigArray>();
+    const ConfigArray *tags = window->at("tags").getIfArray();
     ASSERT_NE(tags, nullptr);
     ASSERT_EQ(tags->size(), 2u);
-    EXPECT_EQ((*tags)[0].valueOr<std::string>(""), "a");
-    EXPECT_EQ((*tags)[1].valueOr<std::string>(""), "b");
+    EXPECT_EQ((*tags)[0].stringOr(""), "a");
+    EXPECT_EQ((*tags)[1].stringOr(""), "b");
 }
 
 TEST(TomlCodecTest, RoundTripsToEqualTree)

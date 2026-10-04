@@ -14,8 +14,8 @@ void mergeInto(ConfigValue &base, const ConfigValue &overlay)
     {
         return;
     }
-    const ConfigTable *overlayTable = overlay.getIf<ConfigTable>();
-    ConfigTable *baseTable          = base.getIf<ConfigTable>();
+    const ConfigTable *overlayTable = overlay.getIfTable();
+    ConfigTable *baseTable          = base.getIfTable();
     if (overlayTable == nullptr || baseTable == nullptr)
     {
         base = overlay;
@@ -27,6 +27,30 @@ void mergeInto(ConfigValue &base, const ConfigValue &overlay)
     }
 }
 } // namespace
+
+bool LayeredStore::booleanOr(const ConfigKey &key, bool fallback) const
+{
+    const ConfigValue *found = find(key);
+    return found != nullptr ? found->booleanOr(fallback) : fallback;
+}
+
+std::int64_t LayeredStore::integerOr(const ConfigKey &key, std::int64_t fallback) const
+{
+    const ConfigValue *found = find(key);
+    return found != nullptr ? found->integerOr(fallback) : fallback;
+}
+
+double LayeredStore::floatingOr(const ConfigKey &key, double fallback) const
+{
+    const ConfigValue *found = find(key);
+    return found != nullptr ? found->floatingOr(fallback) : fallback;
+}
+
+std::string LayeredStore::stringOr(const ConfigKey &key, std::string fallback) const
+{
+    const ConfigValue *found = find(key);
+    return found != nullptr ? found->stringOr(std::move(fallback)) : fallback;
+}
 
 void LayeredStore::pushLayer(ConfigValue tree) { _layers.push_back(std::move(tree)); }
 

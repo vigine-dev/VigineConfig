@@ -17,7 +17,7 @@ TEST(ConfigTreeTest, FindsNestedValue)
     setValue(tree, ConfigKey{"window.size.width"}, ConfigValue{std::int64_t{800}});
     const ConfigValue *found = findValue(tree, ConfigKey{"window.size.width"});
     ASSERT_NE(found, nullptr);
-    EXPECT_EQ(found->valueOr<std::int64_t>(0), 800);
+    EXPECT_EQ(found->integerOr(0), 800);
 }
 
 TEST(ConfigTreeTest, FindMissingReturnsNull)
@@ -39,11 +39,11 @@ TEST(ConfigTreeTest, SetCreatesIntermediateTables)
 
     const ConfigValue *leaf = findValue(tree, ConfigKey{"a.b.c"});
     ASSERT_NE(leaf, nullptr);
-    EXPECT_TRUE(leaf->valueOr<bool>(false));
+    EXPECT_TRUE(leaf->booleanOr(false));
 
     const ConfigValue *intermediate = findValue(tree, ConfigKey{"a"});
     ASSERT_NE(intermediate, nullptr);
-    EXPECT_TRUE(intermediate->is<ConfigTable>());
+    EXPECT_TRUE(intermediate->isTable());
 }
 
 TEST(ConfigTreeTest, SetOverwritesExisting)
@@ -51,5 +51,5 @@ TEST(ConfigTreeTest, SetOverwritesExisting)
     ConfigValue tree{ConfigTable{}};
     setValue(tree, ConfigKey{"k"}, ConfigValue{std::int64_t{1}});
     setValue(tree, ConfigKey{"k"}, ConfigValue{std::int64_t{2}});
-    EXPECT_EQ(findValue(tree, ConfigKey{"k"})->valueOr<std::int64_t>(0), 2);
+    EXPECT_EQ(findValue(tree, ConfigKey{"k"})->integerOr(0), 2);
 }
