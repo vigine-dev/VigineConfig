@@ -1,6 +1,5 @@
 #pragma once
 
-#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -36,16 +35,21 @@ class ConfigValue
 
     ConfigValue(bool value) : _storage(value) {}
 
-    template <std::integral IntegerType>
-        requires(!std::same_as<IntegerType, bool>)
-    ConfigValue(IntegerType value) : _storage(static_cast<std::int64_t>(value))
-    {
-    }
+    ConfigValue(char value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(signed char value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(unsigned char value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(short value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(unsigned short value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(int value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(unsigned int value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(long value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(unsigned long value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(long long value) : _storage(static_cast<std::int64_t>(value)) {}
+    ConfigValue(unsigned long long value) : _storage(static_cast<std::int64_t>(value)) {}
 
-    template <std::floating_point FloatingType>
-    ConfigValue(FloatingType value) : _storage(static_cast<double>(value))
-    {
-    }
+    ConfigValue(float value) : _storage(static_cast<double>(value)) {}
+    ConfigValue(double value) : _storage(static_cast<double>(value)) {}
+    ConfigValue(long double value) : _storage(static_cast<double>(value)) {}
 
     ConfigValue(std::string value) : _storage(std::move(value)) {}
     ConfigValue(const char *value) : _storage(std::string(value)) {}
@@ -62,32 +66,83 @@ class ConfigValue
         return std::holds_alternative<std::monostate>(_storage);
     }
 
-    template <typename ValueType>
-    [[nodiscard]] bool is() const noexcept
+    [[nodiscard]] bool isBoolean() const noexcept { return std::holds_alternative<bool>(_storage); }
+    [[nodiscard]] bool isInteger() const noexcept
     {
-        return std::holds_alternative<ValueType>(_storage);
+        return std::holds_alternative<std::int64_t>(_storage);
+    }
+    [[nodiscard]] bool isFloating() const noexcept
+    {
+        return std::holds_alternative<double>(_storage);
+    }
+    [[nodiscard]] bool isString() const noexcept
+    {
+        return std::holds_alternative<std::string>(_storage);
+    }
+    [[nodiscard]] bool isArray() const noexcept
+    {
+        return std::holds_alternative<ConfigArray>(_storage);
+    }
+    [[nodiscard]] bool isTable() const noexcept
+    {
+        return std::holds_alternative<ConfigTable>(_storage);
     }
 
-    template <typename ValueType>
-    [[nodiscard]] const ValueType *getIf() const noexcept
+    [[nodiscard]] const bool *getIfBoolean() const noexcept { return std::get_if<bool>(&_storage); }
+    [[nodiscard]] bool *getIfBoolean() noexcept { return std::get_if<bool>(&_storage); }
+    [[nodiscard]] const std::int64_t *getIfInteger() const noexcept
     {
-        return std::get_if<ValueType>(&_storage);
+        return std::get_if<std::int64_t>(&_storage);
     }
-
-    template <typename ValueType>
-    [[nodiscard]] ValueType *getIf() noexcept
+    [[nodiscard]] std::int64_t *getIfInteger() noexcept
     {
-        return std::get_if<ValueType>(&_storage);
+        return std::get_if<std::int64_t>(&_storage);
     }
-
-    template <typename ValueType>
-    [[nodiscard]] ValueType valueOr(ValueType fallback) const
+    [[nodiscard]] const double *getIfFloating() const noexcept
     {
-        if (const ValueType *held = std::get_if<ValueType>(&_storage))
-        {
-            return *held;
-        }
-        return fallback;
+        return std::get_if<double>(&_storage);
+    }
+    [[nodiscard]] double *getIfFloating() noexcept { return std::get_if<double>(&_storage); }
+    [[nodiscard]] const std::string *getIfString() const noexcept
+    {
+        return std::get_if<std::string>(&_storage);
+    }
+    [[nodiscard]] std::string *getIfString() noexcept
+    {
+        return std::get_if<std::string>(&_storage);
+    }
+    [[nodiscard]] const ConfigArray *getIfArray() const noexcept
+    {
+        return std::get_if<ConfigArray>(&_storage);
+    }
+    [[nodiscard]] ConfigArray *getIfArray() noexcept { return std::get_if<ConfigArray>(&_storage); }
+    [[nodiscard]] const ConfigTable *getIfTable() const noexcept
+    {
+        return std::get_if<ConfigTable>(&_storage);
+    }
+    [[nodiscard]] ConfigTable *getIfTable() noexcept { return std::get_if<ConfigTable>(&_storage); }
+
+    // The held value of that kind, or the fallback when the value holds another
+    // kind.
+    [[nodiscard]] bool booleanOr(bool fallback) const noexcept
+    {
+        const bool *held = getIfBoolean();
+        return held != nullptr ? *held : fallback;
+    }
+    [[nodiscard]] std::int64_t integerOr(std::int64_t fallback) const noexcept
+    {
+        const std::int64_t *held = getIfInteger();
+        return held != nullptr ? *held : fallback;
+    }
+    [[nodiscard]] double floatingOr(double fallback) const noexcept
+    {
+        const double *held = getIfFloating();
+        return held != nullptr ? *held : fallback;
+    }
+    [[nodiscard]] std::string stringOr(std::string fallback) const
+    {
+        const std::string *held = getIfString();
+        return held != nullptr ? *held : std::move(fallback);
     }
 
     bool operator==(const ConfigValue &other) const = default;

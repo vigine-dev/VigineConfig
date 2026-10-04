@@ -19,7 +19,7 @@ TEST(VigineConfigSmoke, LibraryLinks) { EXPECT_STRNE(vigine::config::version(), 
 TEST(VigineConfigSmoke, UmbrellaHeaderExposesApi)
 {
     const vigine::config::ConfigValue value{std::int64_t{7}};
-    EXPECT_EQ(value.valueOr<std::int64_t>(0), 7);
+    EXPECT_EQ(value.integerOr(0), 7);
 
     const vigine::config::ConfigKey key{"a.b"};
     EXPECT_EQ(key.size(), 2u);

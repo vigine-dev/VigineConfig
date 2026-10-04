@@ -28,7 +28,7 @@ TEST(SchemaRegistryTest, FillsDefaultsForMissingKeys)
 
     const ConfigValue *width = findValue(result.resolved, ConfigKey{"window.width"});
     ASSERT_NE(width, nullptr);
-    EXPECT_EQ(width->valueOr<std::int64_t>(0), 800);
+    EXPECT_EQ(width->integerOr(0), 800);
 }
 
 TEST(SchemaRegistryTest, ReportsTypeMismatch)
@@ -54,7 +54,7 @@ TEST(SchemaRegistryTest, PreservesPresentCorrectValue)
 
     const ValidationResult result = registry.validate(tree);
     EXPECT_TRUE(result.ok);
-    EXPECT_EQ(findValue(result.resolved, ConfigKey{"port"})->valueOr<std::int64_t>(0), 9090);
+    EXPECT_EQ(findValue(result.resolved, ConfigKey{"port"})->integerOr(0), 9090);
 }
 
 TEST(SchemaRegistryTest, RedeclareReplacesEntry)
