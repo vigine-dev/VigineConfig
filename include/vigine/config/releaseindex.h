@@ -42,10 +42,21 @@ struct ReleaseIndex
     std::vector<ReleaseFile> files;
 };
 
-inline constexpr const char *kIndexSchema   = "vigine.release/0";
-inline constexpr const char *kIndexFileName = "release.toml";
-inline constexpr const char *kKindRelease   = "release";
-inline constexpr const char *kKindDeploy    = "deploy";
+inline constexpr const char *kIndexSchema = "vigine.release/0";
+inline constexpr const char *kKindRelease = "release";
+inline constexpr const char *kKindDeploy  = "deploy";
+
+/* A release -- for the target network -- lies with release.toml; a debug deploy -- for the debug
+   network, laid out the same way -- with debug.toml, the same form: the name says which it is. */
+inline constexpr const char *kReleaseIndexFileName = "release.toml";
+inline constexpr const char *kDebugIndexFileName   = "debug.toml";
+
+// The index's file name for a kind: debug.toml for a deploy, release.toml for a release.
+[[nodiscard]] const char *indexFileName(std::string_view kind);
+
+// The index in a release's or a deploy's folder, whichever of the two it holds.
+[[nodiscard]] std::optional<ReleaseIndex> readIndexIn(const std::filesystem::path &folder,
+                                                      std::string &refusal);
 
 // The index as TOML text, and the index a text says; nothing, with why, when it is not one.
 [[nodiscard]] std::string indexText(const ReleaseIndex &index);

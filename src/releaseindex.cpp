@@ -158,6 +158,26 @@ std::optional<ReleaseIndex> readIndex(const std::filesystem::path &file, std::st
     return parseIndex(text.str(), refusal);
 }
 
+const char *indexFileName(std::string_view kind)
+{
+    return kind == kKindDeploy ? kDebugIndexFileName : kReleaseIndexFileName;
+}
+
+std::optional<ReleaseIndex> readIndexIn(const std::filesystem::path &folder, std::string &refusal)
+{
+    std::error_code failed;
+    for (const char *name : {kReleaseIndexFileName, kDebugIndexFileName})
+        if (std::filesystem::exists(folder / name, failed))
+        {
+            std::optional<ReleaseIndex> index = readIndex(folder / name, refusal);
+            // The name and the kind say the same, or the folder is not to be trusted.
+            if (index && indexFileName(index->kind) != std::string_view{name})
+                return refusal = std::string{name} + " says kind " + index->kind, std::nullopt;
+            return index;
+        }
+    return refusal = "no release.toml or debug.toml in " + folder.generic_string(), std::nullopt;
+}
+
 const char *platformName()
 {
 #if defined(_WIN32)

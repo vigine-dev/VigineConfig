@@ -1,5 +1,7 @@
 #include "vigine/config/releaseindex.h"
 
+#include <filesystem>
+#include <fstream>
 #include <gtest/gtest.h>
 
 /* The release index reads back what it wrote, refuses what is not one, and versions order as
@@ -47,6 +49,29 @@ TEST(ReleaseIndex, VersionsOrderAsNumbersAndTheCommitDoesNotOrder)
     EXPECT_EQ(compareVersions("0.4.2+b485c665", "0.4.2+2a67feef"), 0);
     EXPECT_EQ(compareVersions("1", "1.0.0"), 0) << "a missing part is 0";
     EXPECT_LT(compareVersions("1.0.0-rc1", "1.0.0"), 0) << "a pre-release before the version";
+}
+
+// A deploy's index is debug.toml, a release's release.toml; a folder's index is found by either.
+TEST(ReleaseIndex, ADeployLiesWithDebugTomlAReleaseWithReleaseToml)
+{
+    EXPECT_STREQ(indexFileName(kKindDeploy), "debug.toml");
+    EXPECT_STREQ(indexFileName(kKindRelease), "release.toml");
+    const auto folder = std::filesystem::temp_directory_path() / "vigineconfig_index_test";
+    std::filesystem::remove_all(folder);
+    std::filesystem::create_directories(folder);
+    ReleaseIndex index;
+    index.project  = "codemap";
+    index.version  = "0.4.2";
+    index.platform = platformName();
+    index.kind     = kKindDeploy;
+    std::ofstream{folder / "debug.toml"} << indexText(index);
+    std::string refusal;
+    const auto read = readIndexIn(folder, refusal);
+    ASSERT_TRUE(read.has_value()) << refusal;
+    EXPECT_EQ(read->kind, kKindDeploy);
+    std::filesystem::rename(folder / "debug.toml", folder / "release.toml");
+    EXPECT_FALSE(readIndexIn(folder, refusal).has_value()) << "a deploy named as a release";
+    std::filesystem::remove_all(folder);
 }
 
 TEST(ReleaseIndex, AReleaseGoesUnderItsPlatformProjectAndVersion)
