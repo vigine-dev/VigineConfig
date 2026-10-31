@@ -29,4 +29,17 @@ if(VIGINECONFIG_BUILD_TESTS)
 
     include(GoogleTest)
     gtest_discover_tests(vigineconfig-tests)
+
+    # The tests' passport, for VigineTest: the program and where it runs. Only when built on its
+    # own -- inside the engine the engine writes its own.
+    if(PROJECT_IS_TOP_LEVEL)
+        file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tests.passport.json CONTENT
+"{
+  \"product\": \"VigineConfig\",
+  \"programs\": [
+    {\"name\": \"vigineconfig-tests\", \"project\": \"VigineConfig\", \"program\": \"$<TARGET_FILE:vigineconfig-tests>\", \"folder\": \"${CMAKE_CURRENT_BINARY_DIR}\"}
+  ]
+}
+")
+    endif()
 endif()
