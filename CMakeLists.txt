@@ -13,6 +13,8 @@ set(TOMLPP_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/external/tomlplusplus/include)
 
 file(GLOB VIGINECONFIG_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(vigineconfig STATIC ${VIGINECONFIG_SOURCES})
+# The engine's kernel is a shared library that links this one in.
+set_target_properties(vigineconfig PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(vigineconfig
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
     PRIVATE ${TOMLPP_INCLUDE})
