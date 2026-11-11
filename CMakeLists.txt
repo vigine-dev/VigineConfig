@@ -8,8 +8,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(VIGINECONFIG_BUILD_TESTS "Build VigineConfig tests" ON)
 
-# toml++ is header-only and vendored as a nested submodule.
-set(TOMLPP_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/external/tomlplusplus/include)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/SharedSubmodule.cmake)
+vigineconfig_shared_tree(tomlplusplus TOMLPP_TREE)
+vigineconfig_shared_tree(googletest GOOGLETEST_TREE)
+
+# toml++ is header-only.
+set(TOMLPP_INCLUDE ${TOMLPP_TREE}/include)
 
 file(GLOB VIGINECONFIG_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(vigineconfig STATIC ${VIGINECONFIG_SOURCES})
@@ -22,7 +26,7 @@ target_include_directories(vigineconfig
 if(VIGINECONFIG_BUILD_TESTS)
     enable_testing()
     set(gtest_force_shared_crt ON CACHE BOOL "Use shared CRT for GoogleTest" FORCE)
-    add_subdirectory(external/googletest EXCLUDE_FROM_ALL)
+    add_subdirectory(${GOOGLETEST_TREE} ${CMAKE_CURRENT_BINARY_DIR}/googletest EXCLUDE_FROM_ALL)
 
     file(GLOB VIGINECONFIG_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp)
     add_executable(vigineconfig-tests ${VIGINECONFIG_TEST_SOURCES})
