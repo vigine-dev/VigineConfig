@@ -1,7 +1,7 @@
 # VigineConfig
 
-A small, dependency-light configuration core built on a vendored
-[toml++](https://github.com/marzer/tomlplusplus) fork. It is a *functional
+A small, dependency-light configuration core. TOML is read and written
+through VigineFormat. It is a *functional
 core*: no file I/O, no threads, no event system — only value types and pure
 transformations that a host application wires into its own I/O and eventing.
 
@@ -20,11 +20,6 @@ transformations that a host application wires into its own I/O and eventing.
 
 ## Build
 
-```sh
-git clone --recursive https://github.com/vigine-dev/VigineConfig.git
-cmake -S VigineConfig -B build -DCMAKE_BUILD_TYPE=Debug
-cmake --build build
-ctest --test-dir build
-```
-
-Requires a C++23 compiler. toml++ and GoogleTest are vendored as submodules.
+VigineFormat is found with `find_package` from the install folder
+(`CMAKE_PREFIX_PATH`). The build goes by the recipe (task 18254 adds it). The
+tests come from VigineUnitTest.
