@@ -6,42 +6,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(VIGINECONFIG_BUILD_TESTS "Build VigineConfig tests" ON)
+option(VIGINECONFIG_BUILD_TESTS "Build VigineConfig tests (they come from VigineUnitTest)" OFF)
+if(VIGINECONFIG_BUILD_TESTS)
+    message(FATAL_ERROR "VigineConfig's tests come from VigineUnitTest")
+endif()
 
-# toml++ is header-only and vendored as a nested submodule.
-set(TOMLPP_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/external/tomlplusplus/include)
+# VigineFormat is found from CMAKE_PREFIX_PATH (<root>/install/<variant>).
+find_package(VigineFormat REQUIRED)
 
 file(GLOB VIGINECONFIG_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 add_library(vigineconfig STATIC ${VIGINECONFIG_SOURCES})
 # The engine's kernel is a shared library that links this one in.
 set_target_properties(vigineconfig PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(vigineconfig
-    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-    PRIVATE ${TOMLPP_INCLUDE})
-
-if(VIGINECONFIG_BUILD_TESTS)
-    enable_testing()
-    set(gtest_force_shared_crt ON CACHE BOOL "Use shared CRT for GoogleTest" FORCE)
-    add_subdirectory(external/googletest EXCLUDE_FROM_ALL)
-
-    file(GLOB VIGINECONFIG_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp)
-    add_executable(vigineconfig-tests ${VIGINECONFIG_TEST_SOURCES})
-    target_include_directories(vigineconfig-tests PRIVATE ${TOMLPP_INCLUDE})
-    target_link_libraries(vigineconfig-tests PRIVATE vigineconfig gtest gtest_main)
-
-    include(GoogleTest)
-    gtest_discover_tests(vigineconfig-tests)
-
-    # The tests' passport, for VigineTest: the program and where it runs. Only when built on its
-    # own -- inside the engine the engine writes its own.
-    if(PROJECT_IS_TOP_LEVEL)
-        file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/tests.passport.json CONTENT
-"{
-  \"product\": \"VigineConfig\",
-  \"programs\": [
-    {\"name\": \"vigineconfig-tests\", \"project\": \"VigineConfig\", \"program\": \"$<TARGET_FILE:vigineconfig-tests>\", \"folder\": \"${CMAKE_CURRENT_BINARY_DIR}\"}
-  ]
-}
-")
-    endif()
-endif()
+target_include_directories(vigineconfig PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(vigineconfig PRIVATE VigineFormat::VigineFormat)

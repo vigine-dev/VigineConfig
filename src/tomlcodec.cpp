@@ -1,138 +1,97 @@
 #include "vigine/config/tomlcodec.h"
 
-#include <sstream>
+#include "vigine/format/tomlcodec.h"
+
 #include <string>
-#include <toml++/toml.hpp>
 #include <utility>
 
 namespace vigine::config
 {
 namespace
 {
-ConfigValue fromNode(const toml::node &node)
+using vigine::format::TomlKind;
+using vigine::format::TomlValue;
+
+ConfigValue fromToml(const TomlValue &value)
 {
-    switch (node.type())
+    switch (value.kind())
     {
-    case toml::node_type::table: {
+    case TomlKind::Table: {
         ConfigTable result;
-        for (auto &&[key, value] : *node.as_table())
+        for (const std::string &key : value.keys())
         {
-            result.emplace(std::string(key.str()), fromNode(value));
+            result.emplace(key, fromToml(value.at(key)));
         }
         return ConfigValue{std::move(result)};
     }
-    case toml::node_type::array: {
+    case TomlKind::Array: {
         ConfigArray result;
-        for (auto &&element : *node.as_array())
+        for (const TomlValue &element : value.elements())
         {
-            result.push_back(fromNode(element));
+            result.push_back(fromToml(element));
         }
         return ConfigValue{std::move(result)};
     }
-    case toml::node_type::string:
-        return ConfigValue{node.as_string()->get()};
-    case toml::node_type::integer:
-        return ConfigValue{static_cast<std::int64_t>(node.as_integer()->get())};
-    case toml::node_type::floating_point:
-        return ConfigValue{node.as_floating_point()->get()};
-    case toml::node_type::boolean:
-        return ConfigValue{node.as_boolean()->get()};
-    case toml::node_type::date: {
-        std::ostringstream stream;
-        stream << node.as_date()->get();
-        return ConfigValue{stream.str()};
+    case TomlKind::String:
+        return ConfigValue{value.asString()};
+    case TomlKind::Integer:
+        return ConfigValue{value.asInteger()};
+    case TomlKind::Floating:
+        return ConfigValue{value.asFloating()};
+    case TomlKind::Boolean:
+        return ConfigValue{value.asBoolean()};
     }
-    case toml::node_type::time: {
-        std::ostringstream stream;
-        stream << node.as_time()->get();
-        return ConfigValue{stream.str()};
-    }
-    case toml::node_type::date_time: {
-        std::ostringstream stream;
-        stream << node.as_date_time()->get();
-        return ConfigValue{stream.str()};
-    }
-    case toml::node_type::none:
-    default:
-        return ConfigValue{};
-    }
+    return ConfigValue{};
 }
 
-toml::table buildTable(const ConfigTable &source);
-toml::array buildArray(const ConfigArray &source);
+TomlValue toToml(const ConfigValue &value);
 
-void insertValue(toml::table &table, std::string_view key, const ConfigValue &value)
+TomlValue tableToToml(const ConfigTable &source)
 {
-    switch (value.type())
+    TomlValue table = TomlValue::table();
+    for (const auto &[key, entry] : source)
     {
-    case ConfigType::Boolean:
-        table.insert(key, *value.getIfBoolean());
-        break;
-    case ConfigType::Integer:
-        table.insert(key, *value.getIfInteger());
-        break;
-    case ConfigType::Floating:
-        table.insert(key, *value.getIfFloating());
-        break;
-    case ConfigType::String:
-        table.insert(key, *value.getIfString());
-        break;
-    case ConfigType::Array:
-        table.insert(key, buildArray(*value.getIfArray()));
-        break;
-    case ConfigType::Table:
-        table.insert(key, buildTable(*value.getIfTable()));
-        break;
-    case ConfigType::None:
-        break;
-    }
-}
-
-void pushValue(toml::array &array, const ConfigValue &value)
-{
-    switch (value.type())
-    {
-    case ConfigType::Boolean:
-        array.push_back(*value.getIfBoolean());
-        break;
-    case ConfigType::Integer:
-        array.push_back(*value.getIfInteger());
-        break;
-    case ConfigType::Floating:
-        array.push_back(*value.getIfFloating());
-        break;
-    case ConfigType::String:
-        array.push_back(*value.getIfString());
-        break;
-    case ConfigType::Array:
-        array.push_back(buildArray(*value.getIfArray()));
-        break;
-    case ConfigType::Table:
-        array.push_back(buildTable(*value.getIfTable()));
-        break;
-    case ConfigType::None:
-        break;
-    }
-}
-
-toml::table buildTable(const ConfigTable &source)
-{
-    toml::table table;
-    for (const auto &[key, value] : source)
-    {
-        insertValue(table, key, value);
+        if (!entry.isNone())
+        {
+            table.set(key, toToml(entry));
+        }
     }
     return table;
 }
 
-toml::array buildArray(const ConfigArray &source)
+TomlValue arrayToToml(const ConfigArray &source)
 {
-    toml::array array;
-    for (const auto &value : source)
+    TomlValue array = TomlValue::array();
+    for (const ConfigValue &entry : source)
     {
-        pushValue(array, value);
+        if (!entry.isNone())
+        {
+            array.append(toToml(entry));
+        }
     }
     return array;
+}
+
+TomlValue toToml(const ConfigValue &value)
+{
+    switch (value.type())
+    {
+    case ConfigType::Boolean:
+        return TomlValue::boolean(*value.getIfBoolean());
+    case ConfigType::Integer:
+        return TomlValue::integer(*value.getIfInteger());
+    case ConfigType::Floating:
+        return TomlValue::floating(*value.getIfFloating());
+    case ConfigType::String:
+        return TomlValue::string(*value.getIfString());
+    case ConfigType::Array:
+        return arrayToToml(*value.getIfArray());
+    case ConfigType::Table:
+        return tableToToml(*value.getIfTable());
+    case ConfigType::None:
+        break;
+    }
+    throw std::logic_error("toToml: a none value has no TOML form");
 }
 } // namespace
 
@@ -140,14 +99,10 @@ ConfigValue parseToml(std::string_view text)
 {
     try
     {
-        const toml::table table = toml::parse(text);
-        return fromNode(table);
-    } catch (const toml::parse_error &error)
+        return fromToml(vigine::format::createTomlCodec()->parse(text));
+    } catch (const vigine::format::TomlParseError &error)
     {
-        std::ostringstream stream;
-        stream << "TOML parse error: " << error.description() << " (line "
-               << error.source().begin.line << ", column " << error.source().begin.column << ")";
-        throw ConfigParseError(stream.str());
+        throw ConfigParseError(error.what());
     }
 }
 
@@ -158,9 +113,6 @@ std::string serializeToml(const ConfigValue &value)
     {
         throw std::invalid_argument("serializeToml: root value must be a table");
     }
-    const toml::table table = buildTable(*root);
-    std::ostringstream stream;
-    stream << table;
-    return stream.str();
+    return vigine::format::createTomlCodec()->serialize(tableToToml(*root));
 }
 } // namespace vigine::config
