@@ -1,5 +1,6 @@
 #include "vigine/config/tomlcodec.h"
 
+#include "vigine/format/datavalue.h"
 #include "vigine/format/tomlcodec.h"
 
 #include <string>
@@ -9,14 +10,14 @@ namespace vigine::config
 {
 namespace
 {
-using vigine::format::TomlKind;
-using vigine::format::TomlValue;
+using vigine::format::DataKind;
+using vigine::format::DataValue;
 
-ConfigValue fromToml(const TomlValue &value)
+ConfigValue fromToml(const DataValue &value)
 {
     switch (value.kind())
     {
-    case TomlKind::Table: {
+    case DataKind::Table: {
         ConfigTable result;
         for (const std::string &key : value.keys())
         {
@@ -24,31 +25,33 @@ ConfigValue fromToml(const TomlValue &value)
         }
         return ConfigValue{std::move(result)};
     }
-    case TomlKind::Array: {
+    case DataKind::Array: {
         ConfigArray result;
-        for (const TomlValue &element : value.elements())
+        for (const DataValue &element : value.elements())
         {
             result.push_back(fromToml(element));
         }
         return ConfigValue{std::move(result)};
     }
-    case TomlKind::String:
+    case DataKind::String:
         return ConfigValue{value.asString()};
-    case TomlKind::Integer:
+    case DataKind::Integer:
         return ConfigValue{value.asInteger()};
-    case TomlKind::Floating:
+    case DataKind::Float:
         return ConfigValue{value.asFloating()};
-    case TomlKind::Boolean:
+    case DataKind::Boolean:
         return ConfigValue{value.asBoolean()};
+    case DataKind::Null:
+        return ConfigValue{};
     }
     return ConfigValue{};
 }
 
-TomlValue toToml(const ConfigValue &value);
+DataValue toToml(const ConfigValue &value);
 
-TomlValue tableToToml(const ConfigTable &source)
+DataValue tableToToml(const ConfigTable &source)
 {
-    TomlValue table = TomlValue::table();
+    DataValue table = DataValue::table();
     for (const auto &[key, entry] : source)
     {
         if (!entry.isNone())
@@ -59,9 +62,9 @@ TomlValue tableToToml(const ConfigTable &source)
     return table;
 }
 
-TomlValue arrayToToml(const ConfigArray &source)
+DataValue arrayToToml(const ConfigArray &source)
 {
-    TomlValue array = TomlValue::array();
+    DataValue array = DataValue::array();
     for (const ConfigValue &entry : source)
     {
         if (!entry.isNone())
@@ -72,18 +75,18 @@ TomlValue arrayToToml(const ConfigArray &source)
     return array;
 }
 
-TomlValue toToml(const ConfigValue &value)
+DataValue toToml(const ConfigValue &value)
 {
     switch (value.type())
     {
     case ConfigType::Boolean:
-        return TomlValue::boolean(*value.getIfBoolean());
+        return DataValue::boolean(*value.getIfBoolean());
     case ConfigType::Integer:
-        return TomlValue::integer(*value.getIfInteger());
+        return DataValue::integer(*value.getIfInteger());
     case ConfigType::Floating:
-        return TomlValue::floating(*value.getIfFloating());
+        return DataValue::floating(*value.getIfFloating());
     case ConfigType::String:
-        return TomlValue::string(*value.getIfString());
+        return DataValue::string(*value.getIfString());
     case ConfigType::Array:
         return arrayToToml(*value.getIfArray());
     case ConfigType::Table:
