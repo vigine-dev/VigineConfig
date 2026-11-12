@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vigine/config/vigineconfig_export.h"
+
 #include <cstddef>
 #include <string>
 #include <string_view>
@@ -9,7 +11,7 @@ namespace vigine::config
 {
 // Dotted path into a configuration tree, e.g. "window.size.width". Segments are
 // non-empty; an empty path is the root.
-class ConfigKey
+class VIGINECONFIG_API ConfigKey
 {
   public:
     ConfigKey() = default;
