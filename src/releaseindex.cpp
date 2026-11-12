@@ -80,23 +80,23 @@ VersionParts partsOf(std::string_view version)
 std::string indexText(const ReleaseIndex &index)
 {
     std::string text  = "schema = " + tomlQuoted(kIndexSchema) + "\n";
-    text             += "project = " + tomlQuoted(index.project) + "\n";
-    text             += "version = " + tomlQuoted(index.version) + "\n";
-    text             += "commit = " + tomlQuoted(index.commit) + "\n";
-    text             += "engine = " + tomlQuoted(index.engine) + "\n";
-    text             += "platform = " + tomlQuoted(index.platform) + "\n";
-    text             += "kind = " + tomlQuoted(index.kind) + "\n";
-    text             += "built = " + tomlQuoted(index.built) + "\n";
-    text             += "programs = " + tomlList(index.programs) + "\n";
-    text             += "needs = " + tomlList(index.needs) + "\n";
-    text             += "nanokernel = " + tomlQuoted(index.nanokernel) + "\n";
-    text             += "signed_by = " + tomlQuoted(index.signedBy) + "\n";
-    for (const ReleaseFile &file : index.files)
+    text             += "project = " + tomlQuoted(index.project()) + "\n";
+    text             += "version = " + tomlQuoted(index.version()) + "\n";
+    text             += "commit = " + tomlQuoted(index.commit()) + "\n";
+    text             += "engine = " + tomlQuoted(index.engine()) + "\n";
+    text             += "platform = " + tomlQuoted(index.platform()) + "\n";
+    text             += "kind = " + tomlQuoted(index.kind()) + "\n";
+    text             += "built = " + tomlQuoted(index.built()) + "\n";
+    text             += "programs = " + tomlList(index.programs()) + "\n";
+    text             += "needs = " + tomlList(index.needs()) + "\n";
+    text             += "nanokernel = " + tomlQuoted(index.nanokernel()) + "\n";
+    text             += "signed_by = " + tomlQuoted(index.signedBy()) + "\n";
+    for (const ReleaseFile &file : index.files())
     {
-        text += "\n[[file]]\npath = " + tomlQuoted(file.path) + "\n";
-        text += "blake3 = " + tomlQuoted(file.blake3) + "\n";
-        text += "size = " + std::to_string(file.size) + "\n";
-        text += std::string{"signed = "} + (file.signedFile ? "true" : "false") + "\n";
+        text += "\n[[file]]\npath = " + tomlQuoted(file.path()) + "\n";
+        text += "blake3 = " + tomlQuoted(file.blake3()) + "\n";
+        text += "size = " + std::to_string(file.size()) + "\n";
+        text += std::string{"signed = "} + (file.signedFile() ? "true" : "false") + "\n";
     }
     return text;
 }
@@ -115,36 +115,36 @@ std::optional<ReleaseIndex> parseIndex(const std::string &text, std::string &ref
     if (table == nullptr || textOf(*table, "schema") != kIndexSchema)
         return refusal = std::string{"the index's schema is not "} + kIndexSchema, std::nullopt;
     ReleaseIndex index;
-    index.project    = textOf(*table, "project");
-    index.version    = textOf(*table, "version");
-    index.commit     = textOf(*table, "commit");
-    index.engine     = textOf(*table, "engine");
-    index.platform   = textOf(*table, "platform");
-    index.kind       = textOf(*table, "kind");
-    index.built      = textOf(*table, "built");
-    index.programs   = wordsOf(*table, "programs");
-    index.needs      = wordsOf(*table, "needs");
-    index.nanokernel = textOf(*table, "nanokernel");
-    index.signedBy   = textOf(*table, "signed_by");
-    if (index.project.empty() || index.version.empty() || index.platform.empty())
+    index.setProject(textOf(*table, "project"))
+        .setVersion(textOf(*table, "version"))
+        .setCommit(textOf(*table, "commit"))
+        .setEngine(textOf(*table, "engine"))
+        .setPlatform(textOf(*table, "platform"))
+        .setKind(textOf(*table, "kind"))
+        .setBuilt(textOf(*table, "built"))
+        .setPrograms(wordsOf(*table, "programs"))
+        .setNeeds(wordsOf(*table, "needs"))
+        .setNanokernel(textOf(*table, "nanokernel"))
+        .setSignedBy(textOf(*table, "signed_by"));
+    if (index.project().empty() || index.version().empty() || index.platform().empty())
         return refusal = "the index names no project, version or platform", std::nullopt;
-    const auto files = table->find("file");
-    if (const auto *array = files != table->end() ? files->second.getIfArray() : nullptr)
+    std::vector<ReleaseFile> files;
+    const auto fileEntries = table->find("file");
+    if (const auto *array =
+            fileEntries != table->end() ? fileEntries->second.getIfArray() : nullptr)
         for (const ConfigValue &item : *array)
         {
             const ConfigTable *entry = item.getIfTable();
             if (entry == nullptr)
                 continue;
-            ReleaseFile file;
-            file.path       = textOf(*entry, "path");
-            file.blake3     = textOf(*entry, "blake3");
-            const auto size = entry->find("size");
-            file.size =
-                size != entry->end() ? static_cast<std::uint64_t>(size->second.integerOr(0)) : 0;
+            const auto size        = entry->find("size");
             const auto signedValue = entry->find("signed");
-            file.signedFile = signedValue != entry->end() && signedValue->second.booleanOr(false);
-            index.files.push_back(std::move(file));
+            files.emplace_back(
+                textOf(*entry, "path"), textOf(*entry, "blake3"),
+                size != entry->end() ? static_cast<std::uint64_t>(size->second.integerOr(0)) : 0,
+                signedValue != entry->end() && signedValue->second.booleanOr(false));
         }
+    index.setFiles(std::move(files));
     return index;
 }
 
@@ -171,8 +171,8 @@ std::optional<ReleaseIndex> readIndexIn(const std::filesystem::path &folder, std
         {
             std::optional<ReleaseIndex> index = readIndex(folder / name, refusal);
             // The name and the kind say the same, or the folder is not to be trusted.
-            if (index && indexFileName(index->kind) != std::string_view{name})
-                return refusal = std::string{name} + " says kind " + index->kind, std::nullopt;
+            if (index && indexFileName(index->kind()) != std::string_view{name})
+                return refusal = std::string{name} + " says kind " + index->kind(), std::nullopt;
             return index;
         }
     return refusal = "no release.toml or debug.toml in " + folder.generic_string(), std::nullopt;

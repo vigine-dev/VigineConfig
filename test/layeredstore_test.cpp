@@ -2,17 +2,19 @@
 #include "vigine/config/configtree.h"
 #include "vigine/config/configvalue.h"
 #include "vigine/config/layeredstore.h"
+#include <vigine/unittest/unittest.h>
 
 #include <cstdint>
-#include <gtest/gtest.h>
+#include <memory>
 #include <string>
 #include <utility>
 
 using vigine::config::ConfigKey;
 using vigine::config::ConfigTable;
 using vigine::config::ConfigValue;
+using vigine::config::createLayeredStore;
 using vigine::config::findValue;
-using vigine::config::LayeredStore;
+using vigine::config::ILayeredStore;
 using vigine::config::setValue;
 
 namespace
@@ -25,41 +27,41 @@ ConfigValue tableWith(const ConfigKey &key, ConfigValue value)
 }
 } // namespace
 
-TEST(LayeredStoreTest, HigherLayerOverridesLower)
+VIGINE_TEST(LayeredStoreTest, HigherLayerOverridesLower)
 {
-    LayeredStore store;
-    store.pushLayer(tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{1}}));
-    store.pushLayer(tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{2}}));
-    EXPECT_EQ(store.integerOr(ConfigKey{"a"}, 0), 2);
+    const std::unique_ptr<ILayeredStore> store = createLayeredStore();
+    store->pushLayer(tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{1}}));
+    store->pushLayer(tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{2}}));
+    VIGINE_EXPECT_EQ(store->integerOr(ConfigKey{"a"}, 0), 2);
 }
 
-TEST(LayeredStoreTest, FallsThroughToLowerLayer)
+VIGINE_TEST(LayeredStoreTest, FallsThroughToLowerLayer)
 {
-    LayeredStore store;
-    store.pushLayer(tableWith(ConfigKey{"base"}, ConfigValue{std::string{"x"}}));
-    store.pushLayer(tableWith(ConfigKey{"top"}, ConfigValue{std::string{"y"}}));
-    EXPECT_EQ(store.stringOr(ConfigKey{"base"}, ""), "x");
-    EXPECT_EQ(store.stringOr(ConfigKey{"top"}, ""), "y");
+    const std::unique_ptr<ILayeredStore> store = createLayeredStore();
+    store->pushLayer(tableWith(ConfigKey{"base"}, ConfigValue{std::string{"x"}}));
+    store->pushLayer(tableWith(ConfigKey{"top"}, ConfigValue{std::string{"y"}}));
+    VIGINE_EXPECT_EQ(store->stringOr(ConfigKey{"base"}, ""), "x");
+    VIGINE_EXPECT_EQ(store->stringOr(ConfigKey{"top"}, ""), "y");
 }
 
-TEST(LayeredStoreTest, ValueOrReturnsFallbackWhenAbsent)
+VIGINE_TEST(LayeredStoreTest, ValueOrReturnsFallbackWhenAbsent)
 {
-    const LayeredStore store;
-    EXPECT_EQ(store.integerOr(ConfigKey{"missing"}, -1), -1);
+    const std::unique_ptr<ILayeredStore> store = createLayeredStore();
+    VIGINE_EXPECT_EQ(store->integerOr(ConfigKey{"missing"}, -1), -1);
 }
 
-TEST(LayeredStoreTest, EveryKindFallsBackWhenTheKeyHoldsAnother)
+VIGINE_TEST(LayeredStoreTest, EveryKindFallsBackWhenTheKeyHoldsAnother)
 {
-    LayeredStore store;
-    store.pushLayer(tableWith(ConfigKey{"debug"}, ConfigValue{true}));
-    EXPECT_TRUE(store.booleanOr(ConfigKey{"debug"}, false));
-    EXPECT_EQ(store.floatingOr(ConfigKey{"debug"}, 0.5), 0.5);
-    EXPECT_EQ(store.floatingOr(ConfigKey{"missing"}, 1.5), 1.5);
+    const std::unique_ptr<ILayeredStore> store = createLayeredStore();
+    store->pushLayer(tableWith(ConfigKey{"debug"}, ConfigValue{true}));
+    VIGINE_EXPECT_TRUE(store->booleanOr(ConfigKey{"debug"}, false));
+    VIGINE_EXPECT_EQ(store->floatingOr(ConfigKey{"debug"}, 0.5), 0.5);
+    VIGINE_EXPECT_EQ(store->floatingOr(ConfigKey{"missing"}, 1.5), 1.5);
 }
 
-TEST(LayeredStoreTest, FlattenDeepMergesTables)
+VIGINE_TEST(LayeredStoreTest, FlattenDeepMergesTables)
 {
-    LayeredStore store;
+    const std::unique_ptr<ILayeredStore> store = createLayeredStore();
 
     ConfigValue base{ConfigTable{}};
     setValue(base, ConfigKey{"window.width"}, ConfigValue{std::int64_t{800}});
@@ -69,20 +71,20 @@ TEST(LayeredStoreTest, FlattenDeepMergesTables)
     setValue(top, ConfigKey{"window.height"}, ConfigValue{std::int64_t{700}});
     setValue(top, ConfigKey{"window.title"}, ConfigValue{std::string{"app"}});
 
-    store.pushLayer(base);
-    store.pushLayer(top);
+    store->pushLayer(base);
+    store->pushLayer(top);
 
-    const ConfigValue merged = store.flatten();
-    EXPECT_EQ(findValue(merged, ConfigKey{"window.width"})->integerOr(0), 800);
-    EXPECT_EQ(findValue(merged, ConfigKey{"window.height"})->integerOr(0), 700);
-    EXPECT_EQ(findValue(merged, ConfigKey{"window.title"})->stringOr(""), "app");
+    const ConfigValue merged = store->flatten();
+    VIGINE_EXPECT_EQ(findValue(merged, ConfigKey{"window.width"})->integerOr(0), 800);
+    VIGINE_EXPECT_EQ(findValue(merged, ConfigKey{"window.height"})->integerOr(0), 700);
+    VIGINE_EXPECT_EQ(findValue(merged, ConfigKey{"window.title"})->stringOr(""), "app");
 }
 
-TEST(LayeredStoreTest, SetLayerReplacesByIndex)
+VIGINE_TEST(LayeredStoreTest, SetLayerReplacesByIndex)
 {
-    LayeredStore store;
-    store.pushLayer(tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{1}}));
-    store.setLayer(0, tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{9}}));
-    EXPECT_EQ(store.layerCount(), 1u);
-    EXPECT_EQ(store.integerOr(ConfigKey{"a"}, 0), 9);
+    const std::unique_ptr<ILayeredStore> store = createLayeredStore();
+    store->pushLayer(tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{1}}));
+    store->setLayer(0, tableWith(ConfigKey{"a"}, ConfigValue{std::int64_t{9}}));
+    VIGINE_EXPECT_EQ(store->layerCount(), 1u);
+    VIGINE_EXPECT_EQ(store->integerOr(ConfigKey{"a"}, 0), 9);
 }
