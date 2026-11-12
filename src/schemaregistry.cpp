@@ -8,6 +8,8 @@
 
 namespace vigine::config
 {
+ISchemaRegistry::~ISchemaRegistry() = default;
+
 namespace
 {
 class SchemaRegistry final : public ISchemaRegistry

@@ -55,7 +55,7 @@ class VIGINECONFIG_API ValidationResult
 class VIGINECONFIG_API ISchemaRegistry
 {
   public:
-    virtual ~ISchemaRegistry() = default;
+    virtual ~ISchemaRegistry();
 
     // Register an expected key. Re-declaring the same key replaces its entry.
     virtual void declare(ConfigKey key, ConfigType type, ConfigValue defaultValue) = 0;

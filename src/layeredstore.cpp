@@ -8,6 +8,8 @@
 
 namespace vigine::config
 {
+ILayeredStore::~ILayeredStore() = default;
+
 namespace
 {
 void mergeInto(ConfigValue &base, const ConfigValue &overlay)

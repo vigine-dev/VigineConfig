@@ -16,7 +16,7 @@ namespace vigine::config
 class VIGINECONFIG_API ILayeredStore
 {
   public:
-    virtual ~ILayeredStore()                                      = default;
+    virtual ~ILayeredStore();
 
     virtual void pushLayer(ConfigValue tree)                      = 0;
     virtual void setLayer(std::size_t index, ConfigValue tree)    = 0;
