@@ -62,6 +62,30 @@ if(UNIX AND NOT APPLE)
     set_property(TARGET vigineconfig APPEND PROPERTY LINK_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cmake/vigineconfig.map)
 endif()
 
+# --- package -------------------------------------------------------------
+# Our own headers and the library are installed; VigineFormat is a dependency the package config finds.
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+install(TARGETS vigineconfig EXPORT VigineConfigTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR} FILES_MATCHING PATTERN "*.h")
+install(FILES ${VIGINECONFIG_GENERATED_INCLUDE}/vigine/config/vigineconfig_export.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/vigine/config)
+set(VIGINECONFIG_PACKAGE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/VigineConfig)
+install(EXPORT VigineConfigTargets NAMESPACE VigineConfig:: FILE VigineConfigTargets.cmake
+    DESTINATION ${VIGINECONFIG_PACKAGE_DIR})
+configure_package_config_file(cmake/VigineConfigConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/VigineConfigConfig.cmake
+    INSTALL_DESTINATION ${VIGINECONFIG_PACKAGE_DIR})
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/VigineConfigConfigVersion.cmake
+    VERSION 0.1.0 COMPATIBILITY SameMajorVersion)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/VigineConfigConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/VigineConfigConfigVersion.cmake
+    DESTINATION ${VIGINECONFIG_PACKAGE_DIR})
+
 # --- tests ---------------------------------------------------------------
 # VigineUnitTest is found from CMAKE_PREFIX_PATH (<root>/install/<variant>).
 if(VIGINECONFIG_BUILD_TESTS)
