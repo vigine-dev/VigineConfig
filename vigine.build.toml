@@ -1,0 +1,64 @@
+[recipe]
+repo = "VigineConfig"
+variants = ["debug", "release"]
+owns = []
+
+[[dependency]]
+repo = "VigineFormat"
+path = "install"
+branch = "iteration/#2-the-network-and-the-flow-work-without-errors"
+commit = "893ea68f"
+
+[[dependency]]
+repo = "VigineUnitTest"
+path = "install"
+branch = "main"
+commit = "ab232a65cc611b2a1227eeb7e204afef4140a108"
+
+[settings.common]
+CMAKE_C_VISIBILITY_PRESET = "hidden"
+CMAKE_CXX_VISIBILITY_PRESET = "hidden"
+CMAKE_VISIBILITY_INLINES_HIDDEN = "ON"
+CMAKE_POSITION_INDEPENDENT_CODE = "ON"
+BUILD_SHARED_LIBS = "ON"
+CMAKE_CXX_STANDARD = "23"
+CMAKE_CXX_STANDARD_REQUIRED = "ON"
+CMAKE_CXX_EXTENSIONS = "OFF"
+
+[settings.macos]
+CMAKE_SHARED_LINKER_FLAGS = "-Wl,-dead_strip"
+
+[settings.windows]
+CMAKE_SHARED_LINKER_FLAGS = "/OPT:REF"
+
+[settings.linux]
+CMAKE_SHARED_LINKER_FLAGS = "-Wl,--exclude-libs,ALL"
+
+[[step]]
+id = "configure-posix"
+variant = "both"
+systems = ["macos", "linux"]
+run = "cmake -S {repo_root} -B build/{variant} -G Ninja -DCMAKE_BUILD_TYPE={variant} -DCMAKE_CXX_COMPILER={compiler} -DCMAKE_PREFIX_PATH={install} {settings}"
+why = "One build folder per variant; VigineFormat and VigineUnitTest are found from the install folder."
+
+[[step]]
+id = "configure-windows"
+variant = "both"
+systems = ["windows"]
+run = "cmake -S {repo_root} -B build/{variant} -G Ninja -DCMAKE_BUILD_TYPE={variant} -DCMAKE_CXX_COMPILER={compiler} -DCMAKE_PREFIX_PATH={install} {settings}"
+why = "One build folder per variant; VigineFormat and VigineUnitTest are found from the install folder."
+
+[[step]]
+id = "build"
+variant = "both"
+run = "cmake --build build/{variant}"
+why = "Builds the shared library and its tests."
+
+[[step]]
+id = "test"
+variant = "both"
+run = "ctest --test-dir build/{variant} --output-on-failure --output-junit test-results/ctest.xml"
+why = "A recipe repository runs its tests as a recipe step, so the passport records the run; the JUnit file lands in build/{variant}/test-results."
+
+[[rule]]
+text = "On Linux the version script cmake/vigineconfig.map is attached by CMakeLists.txt (it needs the source path); the recipe's linker flag states exclude-libs."

@@ -21,5 +21,5 @@ transformations that a host application wires into its own I/O and eventing.
 ## Build
 
 VigineFormat is found with `find_package` from the install folder
-(`CMAKE_PREFIX_PATH`). The build goes by the recipe (task 18254 adds it). The
+(`CMAKE_PREFIX_PATH`). The build goes by the recipe, vigine.build.toml. The
 tests come from VigineUnitTest.
