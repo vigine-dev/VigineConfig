@@ -20,7 +20,7 @@ VIGINE_TEST(VigineConfigSmoke, TomlParsesAValue)
 
 VIGINE_TEST(VigineConfigSmoke, LibraryLinks)
 {
-    VIGINE_EXPECT_NE(std::string_view{vigine::config::version()}, std::string_view{});
+    VIGINE_EXPECT_STRNE(vigine::config::version(), "");
 }
 
 // The umbrella header exposes the public API behind a single include.

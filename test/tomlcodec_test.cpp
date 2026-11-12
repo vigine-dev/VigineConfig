@@ -29,7 +29,7 @@ VIGINE_TEST(TomlCodecTest, ParsesScalarsAndNesting)
     const ConfigTable *window = table->at("window").getIfTable();
     VIGINE_ASSERT_NE(window, nullptr);
     VIGINE_EXPECT_EQ(window->at("width").integerOr(0), 800);
-    VIGINE_EXPECT_EQ(window->at("ratio").floatingOr(0.0), 1.5);
+    VIGINE_EXPECT_DOUBLE_EQ(window->at("ratio").floatingOr(0.0), 1.5);
     VIGINE_EXPECT_TRUE(window->at("visible").booleanOr(false));
 
     const ConfigArray *tags = window->at("tags").getIfArray();

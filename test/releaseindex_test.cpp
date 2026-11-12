@@ -59,8 +59,8 @@ VIGINE_TEST(ReleaseIndex, VersionsOrderAsNumbersAndTheCommitDoesNotOrder)
 // A deploy's index is debug.toml, a release's release.toml; a folder's index is found by either.
 VIGINE_TEST(ReleaseIndex, ADeployLiesWithDebugTomlAReleaseWithReleaseToml)
 {
-    VIGINE_EXPECT_EQ(std::string_view{indexFileName(kKindDeploy)}, "debug.toml");
-    VIGINE_EXPECT_EQ(std::string_view{indexFileName(kKindRelease)}, "release.toml");
+    VIGINE_EXPECT_STREQ(indexFileName(kKindDeploy), "debug.toml");
+    VIGINE_EXPECT_STREQ(indexFileName(kKindRelease), "release.toml");
     const auto folder = std::filesystem::temp_directory_path() / "vigineconfig_index_test";
     std::filesystem::remove_all(folder);
     std::filesystem::create_directories(folder);
