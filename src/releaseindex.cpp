@@ -3,8 +3,11 @@
 #include "vigine/config/tomlcodec.h"
 
 #include <cstdlib>
+#include <exception>
 #include <fstream>
+#include <ios>
 #include <sstream>
+#include <system_error>
 
 namespace vigine::config
 {
