@@ -1,42 +1,42 @@
 #include "vigine/config/configkey.h"
+#include <vigine/unittest/unittest.h>
 
-#include <gtest/gtest.h>
 #include <stdexcept>
 
 using vigine::config::ConfigKey;
 
-TEST(ConfigKeyTest, ParsesDottedPath)
+VIGINE_TEST(ConfigKeyTest, ParsesDottedPath)
 {
     const ConfigKey key{"window.size.width"};
-    EXPECT_EQ(key.size(), 3u);
-    EXPECT_EQ(key.toString(), "window.size.width");
-    EXPECT_EQ(key.leaf(), "width");
+    VIGINE_EXPECT_EQ(key.size(), 3u);
+    VIGINE_EXPECT_EQ(key.toString(), "window.size.width");
+    VIGINE_EXPECT_EQ(key.leaf(), "width");
 }
 
-TEST(ConfigKeyTest, DefaultAndEmptyStringAreRoot)
+VIGINE_TEST(ConfigKeyTest, DefaultAndEmptyStringAreRoot)
 {
-    EXPECT_TRUE(ConfigKey{}.empty());
-    EXPECT_TRUE(ConfigKey{""}.empty());
+    VIGINE_EXPECT_TRUE(ConfigKey{}.empty());
+    VIGINE_EXPECT_TRUE(ConfigKey{""}.empty());
 }
 
-TEST(ConfigKeyTest, ParentDropsTrailingSegment)
+VIGINE_TEST(ConfigKeyTest, ParentDropsTrailingSegment)
 {
     const ConfigKey key{"a.b.c"};
-    EXPECT_EQ(key.parent().toString(), "a.b");
-    EXPECT_EQ(key.parent().parent().toString(), "a");
-    EXPECT_TRUE(key.parent().parent().parent().empty());
+    VIGINE_EXPECT_EQ(key.parent().toString(), "a.b");
+    VIGINE_EXPECT_EQ(key.parent().parent().toString(), "a");
+    VIGINE_EXPECT_TRUE(key.parent().parent().parent().empty());
 }
 
-TEST(ConfigKeyTest, AppendExtendsPath)
+VIGINE_TEST(ConfigKeyTest, AppendExtendsPath)
 {
     ConfigKey key{"a"};
     key.append("b").append("c");
-    EXPECT_EQ(key.toString(), "a.b.c");
+    VIGINE_EXPECT_EQ(key.toString(), "a.b.c");
 }
 
-TEST(ConfigKeyTest, RejectsEmptySegment)
+VIGINE_TEST(ConfigKeyTest, RejectsEmptySegment)
 {
-    EXPECT_THROW((ConfigKey{"a..b"}), std::invalid_argument);
-    EXPECT_THROW((ConfigKey{"a."}), std::invalid_argument);
-    EXPECT_THROW((ConfigKey{".a"}), std::invalid_argument);
+    VIGINE_EXPECT_THROW((ConfigKey{"a..b"}), std::invalid_argument);
+    VIGINE_EXPECT_THROW((ConfigKey{"a."}), std::invalid_argument);
+    VIGINE_EXPECT_THROW((ConfigKey{".a"}), std::invalid_argument);
 }

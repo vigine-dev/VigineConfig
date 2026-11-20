@@ -1,5 +1,7 @@
 #pragma once
 
+#include "vigine/config/vigineconfig_export.h"
+
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -28,7 +30,7 @@ enum class ConfigType
 
 // Tagged union of the value kinds a configuration tree can hold. The enum order
 // mirrors the variant alternative order, so type() is a plain index cast.
-class ConfigValue
+class VIGINECONFIG_API ConfigValue
 {
   public:
     ConfigValue() noexcept = default;
